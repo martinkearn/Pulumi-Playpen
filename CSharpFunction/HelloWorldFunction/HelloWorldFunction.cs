@@ -10,9 +10,9 @@ using Newtonsoft.Json;
 
 namespace CSharpFunction.HelloWorldFunction
 {
-    public static class Function1
+    public static class HelloWorldFunction
     {
-        [FunctionName("Function1")]
+        [FunctionName(nameof(HelloWorldFunction))]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
