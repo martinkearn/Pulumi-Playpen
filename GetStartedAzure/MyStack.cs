@@ -12,7 +12,7 @@ class MyStack : Stack
     public MyStack()
     {
         // Create an Azure Resource Group
-        var resourceGroup = new ResourceGroup("resourceGroup");
+        var resourceGroup = new ResourceGroup("PulumiGettingStarted");
 
         // Create an Azure resource (Storage Account)
         var storageAccount = new StorageAccount("sa", new StorageAccountArgs
