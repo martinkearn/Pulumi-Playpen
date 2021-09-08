@@ -1,0 +1,3 @@
+name: CSharpFunction
+runtime: dotnet
+description: A Hello World CSharp Azure Function
