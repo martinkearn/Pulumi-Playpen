@@ -2,7 +2,7 @@ name: .NET
 
 defaults:
   run:
-    working-directory: /CSharpFunction/
+    working-directory: CSharpFunction
 
 on:
   push:
