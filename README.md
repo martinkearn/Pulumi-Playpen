@@ -12,3 +12,16 @@ Does the following:
 - Uploads an index.html file
 - Configures the website endpoint and storage key as outputs
 
+## CSharpFunction
+
+Loosely based on [Pulumi Examples - Azure Functions on a Linux App Service Plan](https://github.com/pulumi/examples/tree/master/azure-cs-functions), this sample deploys a C# Azure Function from a separate project.
+
+Does the following:
+
+- Creates the storage account and a blob container
+- Zips the function and uploads the zip to the blob container
+- Generates a SAS url for the zip in storage
+- Sets up Application Insights
+- Creates an App Service plan
+- Creates a Function App and configures it to run from the zip in storage
+
