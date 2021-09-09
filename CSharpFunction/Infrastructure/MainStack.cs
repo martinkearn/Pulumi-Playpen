@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using CSharpFunction.Infrastructure.Helpers;
 using Pulumi;
 using Pulumi.AzureNative.Insights;
 using Pulumi.AzureNative.Resources;
@@ -64,7 +65,7 @@ class MainStack : Stack
             ResourceGroupName = resourceGroup.Name,
         });
 
-        var codeBlobUrl = SignedBlobReadUrl(blob, container, storageAccount, resourceGroup);
+        var functionZipBlobSasUrl = OutputHelpers.SignedBlobReadUrl(blob, container, storageAccount, resourceGroup);
 
         var app = new WebApp("helloworldfunctionapp", new WebAppArgs
         {
@@ -77,7 +78,7 @@ class MainStack : Stack
                 {
                     new NameValuePairArgs{
                         Name = "AzureWebJobsStorage",
-                        Value = GetConnectionString(resourceGroup.Name, storageAccount.Name),
+                        Value = OutputHelpers.GetConnectionString(resourceGroup.Name, storageAccount.Name),
                     },
                     new NameValuePairArgs{
                         Name = "FUNCTIONS_WORKER_RUNTIME",
@@ -89,7 +90,7 @@ class MainStack : Stack
                     },
                     new NameValuePairArgs{
                         Name = "WEBSITE_RUN_FROM_PACKAGE",
-                        Value = codeBlobUrl,
+                        Value = functionZipBlobSasUrl,
                     },
                     new NameValuePairArgs{
                         Name = "APPLICATIONINSIGHTS_CONNECTION_STRING",
@@ -99,80 +100,14 @@ class MainStack : Stack
             },
         });
 
-        this.FunctionZip = codeBlobUrl;
+        this.FunctionZip = functionZipBlobSasUrl;
 
         this.Endpoint = Output.Format($"https://{app.DefaultHostName}/api/HelloWorldFunction?name=Pulumi");
-
-        this.PrimaryStorageKey = Output.Tuple(resourceGroup.Name, storageAccount.Name).Apply(names =>
-            Output.CreateSecret(GetStorageAccountPrimaryKey(names.Item1, names.Item2)));
     }
-
-    [Output]
-    public Output<string> PrimaryStorageKey { get; set; }
 
     [Output]
     public Output<string> Endpoint { get; set; }
 
     [Output]
     public Output<string> FunctionZip { get; set; }
-
-    private static async Task<string> GetStorageAccountPrimaryKey(string resourceGroupName, string accountName)
-    {
-        var accountKeys = await ListStorageAccountKeys.InvokeAsync(new ListStorageAccountKeysArgs
-        {
-            ResourceGroupName = resourceGroupName,
-            AccountName = accountName
-        });
-        return accountKeys.Keys[0].Value;
-    }
-
-
-    private static Output<string> SignedBlobReadUrl(Blob blob, BlobContainer container, StorageAccount account, ResourceGroup resourceGroup)
-    {
-        return Output.Tuple<string, string, string, string>(
-            blob.Name, container.Name, account.Name, resourceGroup.Name).Apply(t =>
-            {
-                (string blobName, string containerName, string accountName, string resourceGroupName) = t;
-
-                var blobSAS = ListStorageAccountServiceSAS.InvokeAsync(new ListStorageAccountServiceSASArgs
-                {
-                    AccountName = accountName,
-                    Protocols = HttpProtocol.Https,
-                    SharedAccessStartTime = DateTime.Now.Subtract(new TimeSpan(365,0,0,0)).ToString("yyyy-MM-dd"),
-                    SharedAccessExpiryTime = DateTime.Now.AddDays(3650).ToString("yyyy-MM-dd"),
-                    Resource = SignedResource.C,
-                    ResourceGroupName = resourceGroupName,
-                    Permissions = Permissions.R,
-                    CanonicalizedResource = "/blob/" + accountName + "/" + containerName,
-                    ContentType = "application/json",
-                    CacheControl = "max-age=5",
-                    ContentDisposition = "inline",
-                    ContentEncoding = "deflate",
-                });
-                return Output.Format($"https://{accountName}.blob.core.windows.net/{containerName}/{blobName}?{blobSAS.Result.ServiceSasToken}");
-            });
-    }
-
-    private static Output<string> GetConnectionString(Input<string> resourceGroupName, Input<string> accountName)
-    {
-        // Retrieve the primary storage account key.
-        var storageAccountKeys = Output.All<string>(resourceGroupName, accountName).Apply(t =>
-        {
-            var resourceGroupName = t[0];
-            var accountName = t[1];
-            return ListStorageAccountKeys.InvokeAsync(
-                new ListStorageAccountKeysArgs
-                {
-                    ResourceGroupName = resourceGroupName,
-                    AccountName = accountName
-                });
-        });
-        return storageAccountKeys.Apply(keys =>
-        {
-            var primaryStorageKey = keys.Keys[0].Value;
-
-            // Build the connection string to the storage account.
-            return Output.Format($"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={primaryStorageKey}");
-        });
-    }
 }
