@@ -9,10 +9,10 @@ class MainStack : Stack
     public MainStack()
     {
         // Create an Azure Resource Group
-        var resourceGroup = new ResourceGroup("resourceGroup");
+        var resourceGroup = new ResourceGroup("BlazorApp");
 
         // Create an Azure resource (Storage Account)
-        var storageAccount = new StorageAccount("sa", new StorageAccountArgs
+        var storageAccount = new StorageAccount("storage", new StorageAccountArgs
         {
             ResourceGroupName = resourceGroup.Name,
             Sku = new SkuArgs
@@ -21,22 +21,5 @@ class MainStack : Stack
             },
             Kind = Kind.StorageV2
         });
-
-        // Export the primary key of the Storage Account
-        this.PrimaryStorageKey = Output.Tuple(resourceGroup.Name, storageAccount.Name).Apply(names =>
-            Output.CreateSecret(GetStorageAccountPrimaryKey(names.Item1, names.Item2)));
-    }
-
-    [Output]
-    public Output<string> PrimaryStorageKey { get; set; }
-
-    private static async Task<string> GetStorageAccountPrimaryKey(string resourceGroupName, string accountName)
-    {
-        var accountKeys = await ListStorageAccountKeys.InvokeAsync(new ListStorageAccountKeysArgs
-        {
-            ResourceGroupName = resourceGroupName,
-            AccountName = accountName
-        });
-        return accountKeys.Keys[0].Value;
     }
 }
