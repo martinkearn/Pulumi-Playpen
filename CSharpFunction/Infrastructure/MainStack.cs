@@ -57,7 +57,7 @@ class MainStack : Stack
         });
 
         // Application insights
-        var appInsights = new Pulumi.AzureNative.Insights.Component("appInsights", new ComponentArgs
+        var appInsights = new Component("appInsights", new ComponentArgs
         {
             ApplicationType = ApplicationType.Web,
             Kind = "web",
