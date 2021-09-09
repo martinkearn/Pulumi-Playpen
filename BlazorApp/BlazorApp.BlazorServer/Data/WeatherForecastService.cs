@@ -1,5 +1,5 @@
 
-namespace BlazorServerWeb.Data;
+namespace BlazorApp.BlazorServer.Data;
 public class WeatherForecastService
 {
     private static readonly string[] Summaries = new[]

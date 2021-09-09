@@ -1,5 +1,5 @@
 
-namespace BlazorServerWeb.Data;
+namespace BlazorApp.BlazorServer.Data;
 public class WeatherForecast
 {
     public DateTime Date { get; set; }

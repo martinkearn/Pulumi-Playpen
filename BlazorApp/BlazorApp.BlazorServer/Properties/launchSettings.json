@@ -3,12 +3,12 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:49607",
-      "sslPort": 44374
+      "applicationUrl": "http://localhost:37374",
+      "sslPort": 44355
     }
   },
   "profiles": {
-    "BlazorServerWeb": {
+    "BlazorApp.BlazorServer": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
