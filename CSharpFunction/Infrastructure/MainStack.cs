@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Pulumi;
 using Pulumi.AzureNative.Insights;
@@ -137,8 +138,8 @@ class MainStack : Stack
                 {
                     AccountName = accountName,
                     Protocols = HttpProtocol.Https,
-                    SharedAccessStartTime = "2021-01-01",
-                    SharedAccessExpiryTime = "2030-01-01",
+                    SharedAccessStartTime = DateTime.Now.Subtract(new TimeSpan(365,0,0,0)).ToString("yyyy-MM-dd"),
+                    SharedAccessExpiryTime = DateTime.Now.AddDays(3650).ToString("yyyy-MM-dd"),
                     Resource = SignedResource.C,
                     ResourceGroupName = resourceGroupName,
                     Permissions = Permissions.R,
