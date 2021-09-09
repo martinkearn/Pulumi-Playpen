@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using CSharpFunction.Infrastructure.Helpers;
 using Pulumi;
 using Pulumi.AzureNative.Insights;
@@ -8,28 +6,61 @@ using Pulumi.AzureNative.Storage;
 using Pulumi.AzureNative.Storage.Inputs;
 using Pulumi.AzureNative.Web;
 using Pulumi.AzureNative.Web.Inputs;
-using Kind = Pulumi.AzureNative.Storage.Kind;
 
 /// <summary>
 /// See https://github.com/pulumi/examples/tree/master/azure-cs-functions
 /// </summary>
 class MainStack : Stack
 {
+    private const string FunctionName = "HelloWorldFunction";
+
     public MainStack()
     {
+        // Create resource group
         var resourceGroup = new ResourceGroup("CSharpFunction");
 
-        var storageAccount = new StorageAccount("storageaccount", new StorageAccountArgs
+        // Create storage account
+        var storageAccount = new StorageAccount("storage", new StorageAccountArgs
         {
             ResourceGroupName = resourceGroup.Name,
             Sku = new SkuArgs
             {
                 Name = SkuName.Standard_LRS
             },
-            Kind = Kind.StorageV2
+            Kind = Pulumi.AzureNative.Storage.Kind.StorageV2
         });
 
-        var appServicePlan = new AppServicePlan("functionappservice", new AppServicePlanArgs
+        // Add blob container to storage account
+        var container = new BlobContainer("functionzips", new BlobContainerArgs
+        {
+            AccountName = storageAccount.Name,
+            PublicAccess = PublicAccess.None,
+            ResourceGroupName = resourceGroup.Name,
+        });
+
+        // Create a zip of the function's publish output and upload it to the blob container
+        var blob = new Blob($"{FunctionName.ToLowerInvariant()}.zip", new BlobArgs
+        {
+            AccountName = storageAccount.Name,
+            ContainerName = container.Name,
+            ResourceGroupName = resourceGroup.Name,
+            Type = BlobType.Block,
+            Source = new FileArchive($"..\\{FunctionName}\\bin\\Debug\\netcoreapp3.1\\publish") // This path should be set to the output of `dotnet publish` command
+        });
+
+        // Generate SAS url for the function output zip in storage
+        var functionZipBlobSasUrl = OutputHelpers.SignedBlobReadUrl(blob, container, storageAccount, resourceGroup);
+
+        // Create application insights
+        var appInsights = new Component("appinsights", new ComponentArgs
+        {
+            ApplicationType = ApplicationType.Web,
+            Kind = "web",
+            ResourceGroupName = resourceGroup.Name,
+        });
+
+        // Create app service plan for function app
+        var appServicePlan = new AppServicePlan("appservice", new AppServicePlanArgs
         {
             ResourceGroupName = resourceGroup.Name,
 
@@ -41,33 +72,8 @@ class MainStack : Stack
             }
         });
 
-        var container = new BlobContainer("functionzips", new BlobContainerArgs
-        {
-            AccountName = storageAccount.Name,
-            PublicAccess = PublicAccess.None,
-            ResourceGroupName = resourceGroup.Name,
-        });
-
-        var blob = new Blob("helloworldfunction.zip", new BlobArgs
-        {
-            AccountName = storageAccount.Name,
-            ContainerName = container.Name,
-            ResourceGroupName = resourceGroup.Name,
-            Type = BlobType.Block,
-            Source = new FileArchive("..\\HelloWorldFunction\\bin\\Debug\\netcoreapp3.1\\publish") // This path should be set to the output of `dotnet publish`
-        });
-
-        // Application insights
-        var appInsights = new Component("appInsights", new ComponentArgs
-        {
-            ApplicationType = ApplicationType.Web,
-            Kind = "web",
-            ResourceGroupName = resourceGroup.Name,
-        });
-
-        var functionZipBlobSasUrl = OutputHelpers.SignedBlobReadUrl(blob, container, storageAccount, resourceGroup);
-
-        var app = new WebApp("helloworldfunctionapp", new WebAppArgs
+        // Create function app. Set WEBSITE_RUN_FROM_PACKAGE to use the zip in storage
+        var app = new WebApp($"{FunctionName.ToLowerInvariant()}app", new WebAppArgs
         {
             Kind = "FunctionApp",
             ResourceGroupName = resourceGroup.Name,
@@ -100,14 +106,16 @@ class MainStack : Stack
             },
         });
 
-        this.FunctionZip = functionZipBlobSasUrl;
+        //var funcApp = new WebAppFunction($"{FunctionName}FunctionApp", new WebAppFunctionArgs
+        //{
+        //    ResourceGroupName = resourceGroup.Name,
+        //    Name = FunctionName
+        //});
 
-        this.Endpoint = Output.Format($"https://{app.DefaultHostName}/api/HelloWorldFunction?name=Pulumi");
+        // Output the function endpoint
+        this.Endpoint = Output.Format($"https://{app.DefaultHostName}/api/{FunctionName}?name=Pulumi");
     }
 
     [Output]
     public Output<string> Endpoint { get; set; }
-
-    [Output]
-    public Output<string> FunctionZip { get; set; }
 }
