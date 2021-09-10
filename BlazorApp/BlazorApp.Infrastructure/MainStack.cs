@@ -55,7 +55,7 @@ class MainStack : Stack
             ResourceGroupName = resourceGroup.Name,
         });
 
-        // Create app service plan for function app
+        // Create app service plan for app
         var appServicePlan = new AppServicePlan("appserviceplan", new AppServicePlanArgs
         {
             ResourceGroupName = resourceGroup.Name,
@@ -66,7 +66,7 @@ class MainStack : Stack
             }
         });
 
-        // Create function app. Set WEBSITE_RUN_FROM_PACKAGE to use the zip in storage
+        // Create app service. Set WEBSITE_RUN_FROM_PACKAGE to use the zip in storage
         var app = new WebApp($"{AppName.ToLowerInvariant()}appservice", new WebAppArgs
         {
             ResourceGroupName = resourceGroup.Name,
