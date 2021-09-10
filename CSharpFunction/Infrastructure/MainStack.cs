@@ -49,7 +49,7 @@ class MainStack : Stack
         });
 
         // Generate SAS url for the function output zip in storage
-        var functionZipBlobSasUrl = OutputHelpers.SignedBlobReadUrl(blob, container, storageAccount, resourceGroup);
+        var deploymentZipBlobSasUrl = OutputHelpers.SignedBlobReadUrl(blob, container, storageAccount, resourceGroup);
 
         // Create application insights
         var appInsights = new Component("appinsights", new ComponentArgs
@@ -60,7 +60,7 @@ class MainStack : Stack
         });
 
         // Create app service plan for function app
-        var appServicePlan = new AppServicePlan("appservice", new AppServicePlanArgs
+        var appServicePlan = new AppServicePlan("appserviceplan", new AppServicePlanArgs
         {
             ResourceGroupName = resourceGroup.Name,
 
@@ -73,7 +73,7 @@ class MainStack : Stack
         });
 
         // Create function app. Set WEBSITE_RUN_FROM_PACKAGE to use the zip in storage
-        var app = new WebApp($"{FunctionName.ToLowerInvariant()}app", new WebAppArgs
+        var app = new WebApp($"{FunctionName.ToLowerInvariant()}appservice", new WebAppArgs
         {
             Kind = "FunctionApp",
             ResourceGroupName = resourceGroup.Name,
@@ -96,7 +96,7 @@ class MainStack : Stack
                     },
                     new NameValuePairArgs{
                         Name = "WEBSITE_RUN_FROM_PACKAGE",
-                        Value = functionZipBlobSasUrl,
+                        Value = deploymentZipBlobSasUrl,
                     },
                     new NameValuePairArgs{
                         Name = "APPLICATIONINSIGHTS_CONNECTION_STRING",
@@ -105,12 +105,6 @@ class MainStack : Stack
                 },
             },
         });
-
-        //var funcApp = new WebAppFunction($"{FunctionName}FunctionApp", new WebAppFunctionArgs
-        //{
-        //    ResourceGroupName = resourceGroup.Name,
-        //    Name = FunctionName
-        //});
 
         // Output the function endpoint
         this.Endpoint = Output.Format($"https://{app.DefaultHostName}/api/{FunctionName}?name=Pulumi");
