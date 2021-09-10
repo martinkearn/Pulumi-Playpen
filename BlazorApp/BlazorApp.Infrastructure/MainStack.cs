@@ -59,12 +59,10 @@ class MainStack : Stack
         var appServicePlan = new AppServicePlan("appserviceplan", new AppServicePlanArgs
         {
             ResourceGroupName = resourceGroup.Name,
-
-            // Consumption plan SKU. Make sure you choose valid settings for the type of App Service you are creating.
             Sku = new SkuDescriptionArgs
             {
-                Tier = "Standard",
-                Name = "F1"
+                Tier = "Shared",
+                Name = "D1"
             }
         });
 
