@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpFunctionDemo.Infrastructure", "Infrastructure\CSharpFunctionDemo.Infrastructure.csproj", "{FF92DC57-01CF-4131-B202-1F8EB3391A6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpFunctionDemo.Function", "Function\CSharpFunctionDemo.Function\CSharpFunctionDemo.Function.csproj", "{DD059E7C-EFF6-4117-A02D-C790EF304323}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF92DC57-01CF-4131-B202-1F8EB3391A6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF92DC57-01CF-4131-B202-1F8EB3391A6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF92DC57-01CF-4131-B202-1F8EB3391A6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF92DC57-01CF-4131-B202-1F8EB3391A6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD059E7C-EFF6-4117-A02D-C790EF304323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD059E7C-EFF6-4117-A02D-C790EF304323}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD059E7C-EFF6-4117-A02D-C790EF304323}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD059E7C-EFF6-4117-A02D-C790EF304323}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {79BEA00D-CEA2-4773-BAAD-CCF8103484C2}
+	EndGlobalSection
+EndGlobal
